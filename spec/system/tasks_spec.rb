@@ -12,7 +12,7 @@ describe 'タスク管理機能', type: :system do
     click_button 'ログイン'
   end
 
-  shared_examples for 'ユーザーAが作成したタスクが表示される' do
+  shared_examples_for 'ユーザーAが作成したタスクが表示される' do
     it {  expect(page).to have_content '最初のタスク' }
   end
 
@@ -22,7 +22,6 @@ describe 'タスク管理機能', type: :system do
       let(:login_user) { user_a }
 
       it_behaves_like 'ユーザーAが作成したタスクが表示される'
-      end
     end
 
     context 'ユーザーBがログインしているとき' do
@@ -43,6 +42,35 @@ describe 'タスク管理機能', type: :system do
       end
 
       it_behaves_like 'ユーザーAが作成したタスクが表示される'
+    end
+  end
+
+  describe '新規作成機能' do
+    let(:login_user) {user_a}
+
+    before do
+      visit new_task_path
+      fill_in 'task_name', with: task_name
+      click_button  '登録する'
+    end
+
+    context '新規作成画面で名称を入力したとき' do
+      let(:task_name) { '新規作成のテストを書く'}
+
+      it '正常に登録される' do
+        # alert-successというcssクラスがついたテキストに「新規作成のテストを書く」が含まれるかどうか調べる
+        expect(page).to have_selector '.alert-success', text: '新規作成のテストを書く'
+      end
+    end
+
+    context '新規作成画面で名称を入力しなかったとき' do
+      let(:task_name) {''}
+
+      it 'エラーとなる' do
+        # error_explanationという検証エラーを表示する領域内で「名称を入力してください」というメッセージが含まれるかどうか調べる
+        within '#error_explanation' do
+          expect(page).to have_content '名称を入力してください'
+        end
       end
     end
   end
